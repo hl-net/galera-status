@@ -449,13 +449,13 @@ clear
 if [[ "$hosts" != "" ]]; then
   hosts=(${hosts//,/ })
 else
-  local_service_config=$(mysqld --verbose --help 2> /dev/null | grep -e "^wsrep")
+  local_service_config=$(</etc/mysql/mariadb.cnf)
 
   hosts=$(echo -e "$local_service_config" | grep gcomm:// | cut -d/ -f3 | tr ',' ' ')
-  sst_method=$(echo -e "$local_service_config" | grep sst-method | tr -s ' ' | cut -d' ' -f2 | cut -d':' -f1)
-  if [[ "$sst_method" == "mariabackup" || "$sst_method" == "xtrabackup" ]]; then
-    username="-u$(echo -e "$local_service_config" | grep sst-auth | tr -s ' ' | cut -d' ' -f2 | cut -d':' -f1)"
-    password="-p$(echo -e "$local_service_config" | grep sst-auth | tr -s ' ' | cut -d' ' -f2 | cut -d':' -f2)"
+  sst_method=$(echo -e "$local_service_config" | grep sst_method | tr -s ' ' | cut -d' ' -f3 | cut -d':' -f1)
+  if [[ "$sst_method" == "mariabackup" || "$sst_method" == "xtrabackup" || "$sst_method" == "rsync" ]]; then
+    username="-u$(echo -e "$local_service_config" | grep sst_auth | tr -s ' ' | cut -d' ' -f3 | cut -d':' -f1)"
+    password="-p$(echo -e "$local_service_config" | grep sst_auth | tr -s ' ' | cut -d' ' -f3 | cut -d':' -f2)"
   fi
 fi
 host_count="${#hosts[@]}"
